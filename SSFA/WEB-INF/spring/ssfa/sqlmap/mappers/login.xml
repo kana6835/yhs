@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="login">
+
+	<select id="getUserInfo" resultType="java.util.HashMap">
+		SELECT 
+			A.SHOPCD 
+			, A.USEREN_NM USERENNM 
+			, A.USERCD 
+			, A.USERNM 
+			, A.USERMAIL 
+			, A.DEPTCD 
+			, A.BIZNO 
+			, A.POSITIONCD 
+			, A.CHARGECD 
+			, A.USERGRP 
+			, A.USERTYPE 
+			, A.TAXAUTH 
+			, A.USERPWD
+			, B.DEPTNM
+			, C.SMSNM 
+			, C.SMSNO 
+			, C.CLIENTNM SHOPNM 
+			, C.CLIENTGRPCD SHOPGRPCD 
+			, C.CLIENTGUBN SHOPGUBN
+			, TO_DATE(NVL(E.EXPRDATE, SYSDATE)) - TO_DATE(SYSDATE) EXPRDATE 
+			, NVL(E.LOCKYN,'N') LOCKYN
+			, NVL(E.ERRCNT,'0') ERRCNT    
+			, E.PWDTYPE
+			, E.USERPWD ENCPWD
+			, CASE WHEN SYSDATE > E.EXPRDATE THEN 'N' ELSE 'Y' END EXPRYN
+			, F.BRANDCNT
+			, TO_CHAR(SYSDATE,'YYYYMMDD') SDATE
+			, #{USERIP} USERIP
+            , C.SVCBRANDCD   
+		FROM 
+			USERINFO A 
+			, ORGANINFO B 
+			, CLIENTINFO C 
+			, USERPWD E		 
+			, (SELECT COUNT(*) BRANDCNT, CLIENTCD FROM CLIENTBRANDINFO GROUP BY CLIENTCD) F 
+		 WHERE 
+		 	A.DEPTCD = B.DEPTCD (+) 
+			 AND A.SHOPCD = C.CLIENTCD 
+			 AND A.SHOPCD = F.CLIENTCD(+) 
+			 AND A.SHOPCD = E.SHOPCD(+) 
+			 AND A.USERCD = E.USERCD(+) 
+			 AND A.WORKYN = 'Y' 
+			 AND (A.ENDDT IS NULL OR SYSDATE <![CDATA[<]]> TO_DATE(A.ENDDT,'YYYYMMDD')) 
+			 AND A.SHOPCD = #{SHOPCD} 
+			 AND A.USERCD = #{USERCD} 
+	</select>
+
+</mapper>

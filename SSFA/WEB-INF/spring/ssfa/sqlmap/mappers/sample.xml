@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sample">
+
+	<!-- ====================================================== 
+			// 공통 Query 정의 
+		 ======================================================-->
+	<sql id="clientInfoColumn">
+			A.CLIENTCD
+			, A.CLIENTNM
+			, A.SHORTNM
+			, A.CLIENTGRPCD
+			, A.REGNO
+			, A.CLIENTGUBN
+			, A.PRESIDENTNM
+			, A.PRETELNO1
+			, A.PRETELNO2
+			, A.PRETELNO3
+			, A.BUSINESSCON
+			, A.BUSINESSTYPE
+			, A.POSTCD
+			, A.ADDRESS1
+			, A.ADDRESS2
+			, A.TELNO1
+			, A.TELNO2
+			, A.TELNO3
+			, A.FAXNO1
+			, A.FAXNO2
+			, A.FAXNO3
+			, A.HOMEPAGE
+			, A.FOUNDATIONDT
+			, A.SHOPIMAGE
+			, A.POSUSEYN
+			, A.SALEYN
+			, A.USEYN
+			, A.LOCALYN
+			, A.USESHOPCD
+			, A.KAIDAID
+			, A.LOCATIONUSEYN
+			, A.ORGYN
+			, A.UPDATESHOPCD
+			, A.UPDATEUSERID
+			, A.UPDATEIP
+			, A.REGDT
+			, A.UPDATEDT
+			, A.MAKERPARTCD
+			, A.SMSNM
+			, A.SMSNO
+			, A.MAKERSVCCD
+			, A.SVCREGNO
+			, A.SVCCHRGNM
+			, A.ACCCLIENTCD
+			, A.ACCCLIENTNM
+			, A.SORTORDER
+			, A.ACCOUNTNO
+			, A.BANKNM
+			, A.RECUSERNM
+			, A.RCIUSEYN
+			, A.SMSNOSRV
+			, A.SMSNMSRV
+			, A.CLIENTPRTNM
+			, A.PRT_PRESIDENTNM
+			, A.PRT_POSTCD
+			, A.PRT_ADDRESS1
+			, A.PRT_ADDRESS2
+			, A.PRT_BUSINESSCON
+			, A.PRT_BUSINESSTYPE
+			, A.BIGO
+			, A.LOGIN_YN
+			, A.BRANDCD
+			, A.SVCBRANDCD
+	</sql>
+	
+	<!-- ======================================================
+		 	// 사용자 정의 Query
+		 ====================================================== -->
+	<select id="getSampleList" resultType="java.util.HashMap">
+		/**clientInfo selectClientAllInfo**/
+		SELECT 
+			1 SO
+			, <include refid="clientInfoColumn" /> 
+		FROM 
+			CLIENTINFO A 
+		WHERE 
+			CLIENTCD = 'NKA0001'
+		UNION ALL
+		SELECT 
+			2 SO
+			, <include refid="clientInfoColumn" />
+		FROM 
+			CLIENTINFO A 
+		WHERE 
+			CLIENTGUBN = 'D' 
+			AND ORGYN = 'Y' 
+			AND LOGIN_YN = 'Y'
+			AND SVCBRANDCD IS NOT NULL
+			<![CDATA[
+			AND ROWNUM < 15
+			]]>	
+		ORDER BY 1, 2
+	
+	</select>
+
+	<select id="getSampleList_paging_cnt" resultType="java.lang.Integer">
+		SELECT COUNT(*) 
+		FROM CLIENTINFO
+	</select>
+
+	<select id="getSampleList_paging" resultType="java.util.HashMap">
+	<![CDATA[
+		SELECT * 
+		FROM( 
+			SELECT ROWNUM R, CI.*
+			FROM CLIENTINFO CI
+			WHERE ROWNUM <= ${pagingEd}
+		)
+		WHERE R >= ${pagingSt}
+	]]>	
+	</select>
+	
+	<select id="getWbs" resultType="java.util.HashMap">
+		SELECT *
+		FROM DEV_WBS
+	</select>
+	
+	<insert id = "insertWbs_multi" parameterType="java.util.HashMap">
+		<foreach collection="list" item="item" index="i" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+		INTO DEV_WBS (JOBCATECD,JOBCATENM,JOBCD,JOBNM)
+		VALUES
+		(
+			'${list[i].JOBCATECD}'
+			,'${list[i].JOBCATENM}'
+			,'${list[i].JOBCD}'
+			,'${list[i].JOBNM}'
+		)
+		</foreach>
+	</insert>
+
+	<insert id = "insertWbs_single" >
+		INSERT INTO DEV_WBS (JOBCATECD,JOBCATENM,JOBCD,JOBNM)
+		VALUES
+		(
+			#{JOBCATECD}
+			,#{JOBCATENM}
+			,#{JOBCD}
+			,#{JOBNM}
+		)
+	</insert>
+</mapper>
